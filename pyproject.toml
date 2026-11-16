@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emg-gesture-controller"
+version = "0.1.0"
+description = "Control a laptop with forearm gestures read from EMG muscle sensors"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "joblib",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools]
+packages = ["emg"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
