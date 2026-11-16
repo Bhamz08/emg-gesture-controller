@@ -16,8 +16,9 @@ Chance is 25%.
 
 ## Across subjects
 
-<!-- Fill in which subjects were included, e.g. S1-S5 -->
-Subjects: S1 to S5 (update if different).
+Subjects: 14 (S1, S2, S3, S4, S7, S9, S12, S14, S15, S17, S23, S24, S35, S40). This table came
+from the MATLAB version of the pair search (movmean downsampling, 50 Hz notch), not from
+`scripts/pair_search.py`. Rerun that script to confirm it with this repo's pipeline.
 
 | Electrodes | Average | Worst subject |
 |---|---|---|
@@ -41,3 +42,46 @@ Subjects: S1 to S5 (update if different).
 
 Use **electrodes 8 + 9**: the best average and the best worst subject. The MyoWare sensors go
 where those electrodes sit in the DB2 electrode diagram.
+
+## Python pipeline check (electrodes 8 + 9, 13 subjects)
+
+`python scripts/train_ninapro.py "S*_E1_A1.mat" --db emg.db` on S2, S3, S4, S7, S9, S12, S14,
+S15, S17, S23, S24, S35, S40: **average 73.5%, worst 57.0% (S4)**. That is within about a point of
+the MATLAB result for 8 + 9; the subject sets differ (no S1 here). Note the worst subject here
+(S4, 57.0%) is lower than the MATLAB worst for this pair (60.2%).
+
+| Subject | LDA | | Subject | LDA |
+|---|---|---|---|---|
+| S4 | 57.0% | | S24 | 77.4% |
+| S7 | 59.9% | | S12 | 79.3% |
+| S35 | 63.9% | | S14 | 79.9% |
+| S17 | 65.1% | | S15 | 80.7% |
+| S2 | 67.1% | | S9 | 88.6% |
+| S23 | 68.8% | | S40 | 91.5% |
+| S3 | 76.6% | | | |
+
+## Database checks (emg.db from the run above)
+
+- 13 users, 13 sessions, 13 models, 24,094 windows; `actions` and `prompts` empty, as expected.
+- Windows per subject: 1,087 (S15) to 2,927 (S7).
+- Balancing works: in every subject, rest has exactly as many windows as the largest gesture.
+
+Average MAV per gesture across all subjects (microvolts; subjects differ in scale, so compare
+within a column):
+
+| Gesture | Sensor 1 (electrode 8) | Sensor 2 (electrode 9) |
+|---|---|---|
+| rest | 7.6 | 5.2 |
+| fist | 25.0 | 20.5 |
+| wrist_down | 27.1 | **51.6** |
+| wrist_up | **66.6** | 19.6 |
+
+What this shows:
+
+- **Each sensor owns one wrist direction.** Electrode 9 fires hardest for wrist down (flexion),
+  electrode 8 for wrist up (extension). That is why two sensors separate the wrist gestures.
+- **Fist is co-contraction:** both sensors moderately active, neither dominant. Fist sits
+  between the two wrist gestures, which is where confusion with them comes from.
+- **The `flex_`/`ext_` column names are backwards.** `flex_` is electrode 8, which acts as the
+  extensor here; `ext_` is electrode 9, which acts as the flexor. Rename in `emg/config.py`
+  before real calibration data goes into the database.
