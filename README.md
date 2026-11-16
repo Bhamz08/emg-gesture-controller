@@ -16,6 +16,7 @@ can measure its own accuracy and improve.
 ## Location
 
 Sensor on the electrode 9 spot: on the inner forearm, about a third of the way from elbow to wrist. Curl your fingers firmly and put it on the bulge.
+
 Sensor near electrode 8: on the ring just below the elbow, on whichever side the correlation check points to.
 
 ## Status
